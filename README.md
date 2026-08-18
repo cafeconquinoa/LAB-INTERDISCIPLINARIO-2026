@@ -2,25 +2,22 @@
 Bitácora y repositorio de documentación del trabajo realizado en el Laboratorio Interdisciplinario 2026.
 # Avance 01 — Enmarque inicial del problema
 
-## Problemática
-
+Problemática
 Patrimonio y Turismo Urbano
 
-## Problema
-
+Problema
 Amenaza de incendios forestales
 
-## Enmarque seleccionado
-
+Enmarque seleccionado
 Personas expuestas
 
-## Avance realizado
+# Avance realizado
 
 Durante esta primera etapa se exploraron distintos posibles enfoques para abordar la amenaza de incendios forestales, entre ellos negligencia, contaminación atmosférica, prevención del terreno, restauración y animales afectados.
 
 A partir de esta exploración, el equipo decidió enfocar la investigación en las personas expuestas a la amenaza de incendios forestales, buscando comprender quiénes se encuentran en mayor riesgo, dónde se localizan y qué factores influyen en su nivel de exposición.
 
-## Datos preliminares recopilados
+# Datos preliminares recopilados
 
 Hasta el momento se han identificado los siguientes antecedentes:
 
@@ -30,7 +27,7 @@ Hasta el momento se han identificado los siguientes antecedentes:
 * Según antecedentes preliminares, alrededor de 900 personas y 301 viviendas se encuentran directamente expuestas a esta amenaza.
 * Se identificó como documento relevante el Plan Comunal de Emergencia por Amenaza de Incendios Forestales 2025–2027.
 
-## Actores identificados
+# Actores identificados
 
 * Personas residentes en sectores expuestos.
 * Municipalidad.
@@ -38,7 +35,7 @@ Hasta el momento se han identificado los siguientes antecedentes:
 * Bomberos.
 * Organizaciones y comunidades cercanas al piedemonte.
 
-## Próximos pasos
+# Próximos pasos
 
 * Precisar qué se entenderá por “persona expuesta”.
 * Identificar territorialmente los sectores con mayor exposición.
