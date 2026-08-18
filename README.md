@@ -1,5 +1,5 @@
 # LAB-INTERDISCIPLINARIO-2026
-Bitácora y repositorio de documentación del trabajo realizado en el Laboratorio Interdisciplinario 2026.
+Bitácora de investigación sobre personas expuestas a la amenaza de incendios forestales en La Reina, en el contexto de patrimonio y turismo urbano.
 # Avance 01 — Enmarque inicial del problema
 
 Problemática
