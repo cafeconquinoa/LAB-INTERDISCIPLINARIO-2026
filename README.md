@@ -3,13 +3,16 @@ Bitácora y repositorio de documentación del trabajo realizado en el Laboratori
 # Avance 01 — Enmarque inicial del problema
 
 Problemática
-  Patrimonio y Turismo Urbano
+
+Patrimonio y Turismo Urbano
 
 Problema
-  Amenaza de incendios forestales
+
+Amenaza de incendios forestales
 
 Enmarque seleccionado
-  Personas expuestas
+
+Personas expuestas
 
 # Avance realizado
 
