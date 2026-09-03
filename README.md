@@ -13,7 +13,7 @@ https://usach.primo.exlibrisgroup.com/discovery/fulldisplay?docid=alma9922038314
 Maira Lican-Ray. (2020). Sendero de Mitigación Tres Esteros de Tomé, Enfocado en el plan de protección de incendios forestales para la comuna de Tomé- Sector estero Coliumo.
 https://usach.primo.exlibrisgroup.com/discovery/fulldisplay?docid=alma991931419306116&context=L&vid=56USACH_INST:56USACH_INST
 
--
+_
 Bitácora de investigación sobre personas expuestas a la amenaza de incendios forestales en La Reina, en el contexto de patrimonio y turismo urbano.
 # Avance 01 — Enmarque inicial del problema
 
