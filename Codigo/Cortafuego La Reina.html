@@ -1,0 +1,806 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cortafuego La Reina</title>
+<style>
+/* Layout: barra lateral fija + columna principal (chips, KPIs, mapa con tablas debajo, panel de detalle a la derecha) */
+:root{
+  --bg:#f2f6fb; --panel:#ffffff; --ink:#15223b; --muted:#64738a; --line:#e2e9f1; --soft:#f1f5fa;
+  --ok:#17a34a; --ok-bg:#e1f5e6; --ok-ink:#0f7636;
+  --warn:#f0a000; --warn-bg:#fff0d1; --warn-ink:#935700;
+  --crit:#e5252c; --crit-bg:#fde2e2; --crit-ink:#b8151c;
+  --off:#8892a4; --off-bg:#e8ecf2; --off-ink:#4c586b;
+  --info:#2484df; --info-bg:#e1eefc; --info-ink:#1a5ba3;
+  --r:14px;
+  --font:"Segoe UI","Noto Sans",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 var(--font)}
+button{font:inherit;color:inherit}
+h1,h2,h3,h4,p{margin:0}
+h1,h2,h3,h4,b{font-weight:600}
+.ic{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+:focus-visible{outline:3px solid var(--info);outline-offset:2px}
+
+/* tonos de estado: cada uno define color, fondo y tinta */
+.t-ok{--c:var(--ok);--cb:var(--ok-bg);--ci:var(--ok-ink)}
+.t-warn{--c:var(--warn);--cb:var(--warn-bg);--ci:var(--warn-ink)}
+.t-crit{--c:var(--crit);--cb:var(--crit-bg);--ci:var(--crit-ink)}
+.t-off{--c:var(--off);--cb:var(--off-bg);--ci:var(--off-ink)}
+.t-info{--c:var(--info);--cb:var(--info-bg);--ci:var(--info-ink)}
+.dot{display:inline-flex;align-items:center;justify-content:center;width:12px;height:12px;border-radius:50%;background:var(--c);flex:none;color:#fff;font:600 10px/1 var(--font);font-style:normal}
+.pill{display:inline-block;padding:2px 10px;border-radius:6px;background:var(--cb);color:var(--ci);font-size:12px;white-space:nowrap}
+.badge{min-width:19px;height:19px;border-radius:10px;background:var(--crit);color:#fff;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+
+/* ---------- barra lateral ---------- */
+.side{background:var(--panel);border-right:1px solid var(--line);padding:22px 0 18px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{display:flex;gap:10px;align-items:center;padding:0 18px;margin-bottom:26px}
+.brand svg{width:38px;height:38px;color:var(--ok);stroke-width:1.4}
+.brand b{display:block;font-size:17px;letter-spacing:-.2px;line-height:1.2}
+.brand span{display:block;font-size:12.5px;color:var(--muted);line-height:1.25}
+.nav{display:flex;flex-direction:column;gap:6px;padding-right:16px}
+.nav button{display:flex;align-items:center;gap:12px;border:0;border-left:3px solid transparent;background:none;padding:9px 14px 9px 20px;border-radius:0 10px 10px 0;cursor:pointer;font-size:14.5px;color:var(--muted);text-align:left}
+.nav button:hover{background:var(--soft)}
+.nav button.on{background:var(--ok-bg);color:var(--ink);font-weight:600;border-left-color:var(--ok)}
+.nav button.on .ic{color:var(--ok-ink)}
+.nav .ic{width:21px;height:21px}
+.nav .badge{margin-left:auto}
+.sideFoot{margin-top:auto;padding:0 16px}
+.sideFoot svg{width:100%;height:auto;display:block;border-radius:12px}
+.sideFoot p{font-size:11.5px;color:var(--muted);margin:10px 4px 0}
+
+/* ---------- cabecera ---------- */
+.main{padding:20px 24px 32px;min-width:0}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+.top h1{font-size:23px;line-height:1.15;letter-spacing:-.3px;text-wrap:balance}
+.top p{margin-top:3px;font-size:14px;color:var(--muted)}
+.who{display:flex;align-items:center;gap:14px;flex:none}
+.bell{position:relative;border:0;background:none;cursor:pointer;padding:6px;border-radius:10px;color:var(--muted);display:flex}
+.bell .ic{width:24px;height:24px}
+.bell .badge{position:absolute;top:-3px;right:-5px}
+.avatar{width:38px;height:38px;font-size:13px;border-radius:50%;background:#7b89a2;color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.who b{display:block;font-size:13.5px}
+.who small{color:var(--muted);font-size:12.5px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:9px;font-size:13px;background:var(--cb);color:var(--ci);min-width:0}
+.chip .ic{width:17px;height:17px;color:var(--c)}
+.chip b{font-weight:600}
+.chip .dot{width:11px;height:11px}
+
+/* ---------- tarjetas ---------- */
+.card{background:var(--panel);border-radius:var(--r);box-shadow:0 1px 2px rgba(21,34,59,.05),0 0 0 1px rgba(21,34,59,.04);min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:14px}
+.kpi{display:flex;align-items:center;gap:13px;padding:13px 16px}
+.ico{width:44px;height:44px;border-radius:50%;background:var(--cb);color:var(--c);display:flex;align-items:center;justify-content:center;flex:none}
+.ico .ic{width:23px;height:23px}
+.ico.sm{width:32px;height:32px}
+.ico.sm .ic{width:18px;height:18px}
+.kpi .lab{font-size:12.5px;color:var(--muted)}
+.kpi .num{font-size:24px;font-weight:600;line-height:1.2;letter-spacing:-.2px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi .fecha{font-size:12.5px;letter-spacing:0;color:var(--muted);margin-left:8px;font-weight:400;white-space:nowrap}
+.sp{margin-left:auto;text-align:right;flex:none}
+.sp svg{width:104px;height:34px;display:block}
+.sp small{font-size:10.5px;color:var(--muted);white-space:nowrap}
+
+.board{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:stretch}
+.left{display:grid;gap:14px;min-width:0;align-content:start}
+.tables{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cardHead{display:flex;align-items:center;gap:12px;padding:14px 16px 8px}
+.cardHead>.ic{width:22px;height:22px;color:var(--muted)}
+.cardHead h2{font-size:15px;line-height:1.25}
+.cardHead p{margin-top:1px;font-size:12.5px;color:var(--muted)}
+.legend{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .dot{width:9px;height:9px}
+.link{margin-left:auto;border:0;background:var(--info-bg);color:var(--info-ink);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+.link .ic{width:14px;height:14px;stroke-width:2}
+
+/* ---------- mapa ---------- */
+.map{position:relative;margin:4px 8px 8px;height:362px;border-radius:10px;overflow:hidden;background:#3d5629;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.map.zoomed{touch-action:none;cursor:grab}
+.mapInner{position:absolute;left:0;top:0;width:100%;height:100%}
+.mapInner canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+.capa{position:absolute;left:0;top:0;width:100%;height:100%}
+.poste{position:absolute;width:0;height:0;padding:0;border:0;background:none;cursor:pointer;z-index:1}
+.poste:focus{outline:none}
+.poste:hover,.poste:focus-visible{z-index:4}
+.poste.sel{z-index:3}
+.palo{position:absolute;left:-1.5px;bottom:0;width:3px;height:44px;background:#f4f6f8;border-radius:2px;box-shadow:0 0 0 1px rgba(0,0,0,.28)}
+.palo:before{content:"";position:absolute;left:-5px;top:9px;width:13px;height:2px;background:#f4f6f8;box-shadow:0 0 0 1px rgba(0,0,0,.2)}
+.pin{position:absolute;left:-10px;bottom:39px;display:flex;align-items:center;gap:7px;background:#fff;color:var(--ink);border-radius:11px;padding:3px;font-size:11.5px;font-weight:600;white-space:nowrap;box-shadow:0 1px 5px rgba(0,0,0,.4)}
+.pin .dot{width:14px;height:14px;font-size:10px}
+.pin b{display:none;padding-right:7px}
+.poste.lbl .pin b,.poste:hover .pin b,.poste:focus-visible .pin b{display:block}
+.poste:not(.lbl) .palo{height:28px}
+.poste:not(.lbl) .pin{bottom:23px}
+.poste.sel .pin{box-shadow:0 0 0 2.5px var(--c),0 2px 8px rgba(0,0,0,.45)}
+.poste:focus-visible .pin{outline:3px solid #fff;outline-offset:3px}
+.pl{position:absolute;top:7px;left:0;transform:translateX(-50%);background:rgba(18,26,22,.74);color:#fff;font-size:10.5px;padding:1px 6px;border-radius:5px;white-space:nowrap}
+.zoom{position:absolute;left:14px;bottom:14px;display:flex;flex-direction:column;background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.35);overflow:hidden;z-index:5}
+.zoom button{width:32px;height:30px;border:0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.zoom button:hover{background:var(--soft)}
+.zoom button:disabled{opacity:.35;cursor:default}
+.zoom .ic{width:17px;height:17px;stroke-width:2}
+.norte{position:absolute;right:14px;top:14px;width:36px;height:36px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;line-height:1;z-index:5}
+.norte svg{width:11px;height:11px;fill:var(--info-ink)}
+.escala{position:absolute;right:16px;bottom:12px;color:#fff;font-size:11.5px;font-weight:600;text-shadow:0 1px 3px #000,0 0 2px #000;z-index:5}
+.nums{display:flex;justify-content:space-between;margin-bottom:2px}
+.barra{height:6px;border:1.5px solid #fff;border-top:0;position:relative;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7))}
+.barra:after{content:"";position:absolute;left:50%;bottom:0;width:1.5px;height:4px;margin-left:-1px;background:#fff}
+
+/* ---------- tablas ---------- */
+.tw{overflow-x:auto;padding:0 8px 10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:400;color:var(--muted);font-size:12px;text-align:left;padding:7px 8px;background:var(--soft);white-space:nowrap}
+th:first-child{border-radius:8px 0 0 8px}
+th:last-child{border-radius:0 8px 8px 0}
+td{padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+td .dot{width:9px;height:9px;vertical-align:0;margin-right:10px}
+tr.clic{cursor:pointer}
+tr.clic:hover td,tr.clic.sel td{background:var(--soft)}
+td.nada{color:var(--muted);padding:18px 8px;white-space:normal}
+
+/* ---------- panel de detalle ---------- */
+.detalle{display:flex;flex-direction:column}
+.x{margin-left:auto;border:0;background:var(--soft);border-radius:8px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.x .ic{width:18px;height:18px}
+.vacio{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px 28px 36px}
+.vacio svg{width:100%;max-width:270px;height:auto}
+.vacio h3{margin:16px 0 5px;font-size:17px}
+.vacio p{color:var(--muted);font-size:13.5px;max-width:32ch}
+.ficha{padding:2px 16px 16px;display:grid;gap:12px}
+.fichaTop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fichaTop h3{font-size:18px}
+.meta{font-size:12.5px;color:var(--muted);margin-top:-6px}
+.vars{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.var{background:var(--soft);border-radius:10px;padding:10px 12px;min-width:0}
+.var span{display:block;font-size:11.5px;color:var(--muted)}
+.var b{font-size:19px;font-variant-numeric:tabular-nums}
+.var b small{font-size:12px;font-weight:400}
+.var.pend b{color:#a2acbc;font-weight:400}
+.var em{display:block;font-style:normal;font-size:11px;color:var(--muted)}
+.graf h4{font-size:12.5px;font-weight:600;display:flex;justify-content:space-between;gap:8px;margin-bottom:2px}
+.graf h4 span{font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+.graf svg{width:100%;height:auto;display:block;touch-action:pan-y}
+.ax{font-size:10.5px;fill:var(--muted)}
+.nota{font-size:13px;color:var(--muted);padding:8px 0}
+.cam{border-radius:10px;background:#1c2637;color:#b9c3d3;padding:14px;text-align:center;font-size:12.5px}
+.cam b{display:block;color:#fff;font-size:13px;margin-bottom:2px}
+.hist{list-style:none;margin:0;padding:0;font-size:12.5px}
+.hist .dot{width:9px;height:9px}
+.hist li{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.hist li:last-child{border-bottom:0}
+.hist time{color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ---------- otras vistas ---------- */
+.dos{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;align-items:start}
+.lista{padding:0 16px 14px;display:grid;gap:8px}
+.alerta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--cb);border-radius:10px;padding:12px 14px}
+.alerta b{font-size:14px}
+.alerta span{font-size:12.5px;color:var(--ci)}
+.alerta .link{background:#fff}
+.pasos{margin:0;padding:4px 16px 16px;list-style:none;counter-reset:p;display:grid;gap:12px}
+.pasos li{counter-increment:p;display:grid;grid-template-columns:26px 1fr;gap:12px;font-size:12.5px;color:var(--muted)}
+.pasos li:before{content:counter(p);width:26px;height:26px;font-size:12px;border-radius:50%;background:var(--ok-bg);color:var(--ok-ink);font-weight:600;display:flex;align-items:center;justify-content:center}
+.pasos b{display:block;color:var(--ink);font-size:13.5px}
+.comp{padding:0 16px 14px}
+.metric{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:9px 0;font-size:13px}
+.metric:first-child{border-top:0}
+.metric b{color:#a2acbc;font-weight:400}
+.texto{padding:0 16px 16px;font-size:13px;color:var(--muted);max-width:75ch}
+
+@media(max-width:1180px){
+  .board{grid-template-columns:minmax(0,1fr)}
+  .left{display:contents}
+  .detalle{order:2}
+  .tables{order:3}
+  .kpis{grid-template-columns:1fr 1fr}
+  .vacio svg{max-width:240px}
+}
+@media(max-width:820px){
+  .app{display:block}
+  .side{position:static;height:auto;padding:12px 0 8px;border-right:0;border-bottom:1px solid var(--line)}
+  .brand{margin-bottom:10px;padding:0 16px}
+  .brand svg{width:30px;height:30px}
+  .brand b{font-size:15.5px}
+  .brand span{font-size:12px}
+  .nav{flex-direction:row;gap:4px;padding:0 12px;overflow-x:auto}
+  .nav button{border-left:0;border-radius:10px;padding:8px 12px;font-size:13.5px;gap:8px;white-space:nowrap}
+  .nav .ic{width:18px;height:18px}
+  .nav .badge{margin-left:2px}
+  .sideFoot{display:none}
+  .main{padding:16px}
+  .top h1{font-size:20px}
+  .top p{font-size:13px}
+  .who div{display:none}
+  .tables,.dos{grid-template-columns:minmax(0,1fr)}
+  .map{height:300px}
+  .cardHead{flex-wrap:wrap}
+  .legend{margin-left:0;width:100%}
+}
+@media(max-width:520px){
+  .kpis{grid-template-columns:minmax(0,1fr)}
+  .chip{width:100%}
+  .nav{display:grid;grid-template-columns:1fr 1fr}
+  th,td{padding:7px 5px;white-space:normal}
+  td .dot{margin-right:6px}
+  td:first-child,td:last-child{white-space:nowrap}
+}
+</style>
+<style>
+/* ---- solo vista previa: no es parte del sketch ---- */
+.preview{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--ink);color:#c6cfdd;font-size:12.5px}
+.preview b{color:#fff;font-weight:600}
+.seg{display:inline-flex;flex-wrap:wrap;background:rgba(255,255,255,.1);border-radius:999px;padding:3px}
+.seg button{color:#c6cfdd;background:none;border:0;border-radius:999px;padding:6px 12px;cursor:pointer;font-size:12.5px}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);font-weight:600}
+.seg button:focus-visible{outline-color:#fff}
+@media(min-width:821px){.app{min-height:calc(100vh - 51px)}.side{height:calc(100vh - 51px)}}
+</style>
+
+
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H4.5A1.5 1.5 0 0 1 3 19.500z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9.500a6 6 0 0 1 12 0c0 5 2 6 2 7.500H4c0-1.500 2-2.500 2-7.500zM10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.500" y="5" width="17" height="15" rx="2"/><path d="M3.500 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19C4 10 10 4 20 4c0 10-5 16-15 15zM4 21c2-6 6-9 11-11"/></symbol>
+  <symbol id="i-nodes" viewBox="0 0 24 24"><circle cx="12" cy="6" r="2.800"/><circle cx="6" cy="17" r="2.800"/><circle cx="18" cy="17" r="2.800"/><path d="M10.600 8.400L7.400 14.600M13.400 8.400l3.200 6.200M8.800 17h6.400"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3zM12 10v4.500M12 17.300v.200"/></symbol>
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5.500 5 10.500a5 5 0 0 1-10 0c0-2 1-3.200 2-4.200 0 2 1 3 2 3 0-3-1-5.300 1-9.300z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/></symbol>
+  <symbol id="i-map" viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.200 7-11.500a7 7 0 0 0-14 0C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.500"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></symbol>
+</svg>
+
+
+<div class="preview">
+  <span><b>Vista previa del sketch</b> · el nodo A-07 recibe lecturas simuladas del DHT11, una cada 2 s</span>
+  <span class="seg" role="group" aria-label="Escenario simulado para el nodo A-07">
+    <button type="button" id="sim-normal" aria-pressed="true">Normal · 23 °C</button>
+    <button type="button" id="sim-alerta" aria-pressed="false">Advertencia · 27 °C</button>
+    <button type="button" id="sim-critico" aria-pressed="false">Crítico · 32 °C</button>
+    <button type="button" id="sim-off" aria-pressed="false">ESP32 apagado</button>
+  </span>
+</div>
+<div class="app">
+
+  <aside class="side">
+    <div class="brand">
+      <svg class="ic" aria-hidden="true"><use href="#i-leaf"/></svg>
+      <div><b>La Reina</b><span>Monitoreo de<br>Interfaz Forestal</span></div>
+    </div>
+    <nav class="nav" id="nav" aria-label="Secciones">
+      <button type="button" class="on" data-v="monitoreo"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg>Monitoreo</button>
+      <button type="button" data-v="alertas"><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg>Alertas<span class="badge" id="navBadge" hidden></span></button>
+      <button type="button" data-v="eventos"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg>Eventos</button>
+      <button type="button" data-v="post"><svg class="ic" aria-hidden="true"><use href="#i-leaf"/></svg>Post-incendio</button>
+    </nav>
+    <div class="sideFoot">
+      <svg viewBox="0 0 220 104" aria-hidden="true">
+        <rect width="220" height="104" fill="#eaf1f8"/>
+        <path d="M0 78L52 30l34 30 40-44 46 40 48-30v78H0z" fill="#cfdbe8"/>
+        <path d="M0 86c40-16 70-10 110-4s80 0 110-12v34H0z" fill="#dfe8f1"/>
+        <g fill="#3f9a57"><path d="M30 44l12 22h-6l9 16H15l9-16h-6z"/><path d="M66 56l9 17h-5l7 12H55l7-12h-5z"/><path d="M178 50l11 20h-6l8 15h-26l8-15h-6z"/></g>
+        <g fill="#6cb77b"><path d="M96 62l8 15h-4l6 10H86l6-10h-4z"/><path d="M146 58l9 16h-5l7 12h-22l7-12h-5z"/><path d="M204 64l7 13h-4l5 9h-16l5-9h-4z"/></g>
+        <rect y="86" width="220" height="18" fill="#d5e6d3"/>
+      </svg>
+      <p id="pie">Prototipo · Sistema de Monitoreo de Interfaz Forestal</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <div>
+        <h1 id="titulo">Monitoreo de cortafuego</h1>
+        <p>Corredor de protección forestal · La Reina</p>
+      </div>
+      <div class="who">
+        <button type="button" class="bell" id="bell" aria-label="Ver alertas"><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg><span class="badge" id="bellBadge" hidden></span></button>
+        <span class="avatar" aria-hidden="true">CM</span>
+        <div><b>Carolina Mena</b><small>Operador municipal</small></div>
+      </div>
+    </header>
+
+    <div class="chips">
+      <span class="chip t-ok" id="chipSis"></span>
+      <span class="chip t-off" id="chipEv"></span>
+      <span class="chip t-info" id="chipAct"></span>
+    </div>
+
+    <section class="vista" id="v-monitoreo">
+      <div class="kpis">
+        <div class="card kpi t-ok"><span class="ico"><svg class="ic" aria-hidden="true"><use href="#i-nodes"/></svg></span><div><div class="lab">Nodos activos</div><div class="num" id="kAct">--</div></div><div class="sp"><div id="sp1"></div><small id="sc1"></small></div></div>
+        <div class="card kpi t-warn"><span class="ico"><svg class="ic" aria-hidden="true"><use href="#i-warn"/></svg></span><div><div class="lab">En advertencia</div><div class="num" id="kAdv">--</div></div><div class="sp"><div id="sp2"></div><small id="sc2"></small></div></div>
+        <div class="card kpi t-crit"><span class="ico"><svg class="ic" aria-hidden="true"><use href="#i-fire"/></svg></span><div><div class="lab">Alertas críticas</div><div class="num" id="kCrit">--</div></div><div class="sp"><div id="sp3"></div><small id="sc3"></small></div></div>
+        <div class="card kpi t-info"><span class="ico"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></span><div><div class="lab">Última actualización</div><div class="num"><span id="kHora">--:--</span><span class="fecha" id="kFecha"></span></div></div></div>
+      </div>
+
+      <div class="board">
+        <div class="left">
+          <div class="card">
+            <div class="cardHead">
+              <svg class="ic" aria-hidden="true"><use href="#i-map"/></svg>
+              <div><h2>Cortafuego monitoreado</h2><p>Corredor lineal de 100 m con postes y nodos de monitoreo</p></div>
+              <div class="legend">
+                <span><i class="dot t-ok"></i>Normal</span><span><i class="dot t-warn"></i>Advertencia</span><span><i class="dot t-crit"></i>Crítico</span><span><i class="dot t-off"></i>Sin conexión</span>
+              </div>
+            </div>
+            <div class="map" id="map">
+              <div class="mapInner" id="mapInner"><canvas id="terreno"></canvas><div class="capa" id="capa"></div></div>
+              <div class="norte" aria-label="Norte"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M7 0l5 13-5-3-5 3z"/></svg>N</div>
+              <div class="zoom">
+                <button type="button" id="zIn" aria-label="Acercar"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></button>
+                <button type="button" id="zOut" aria-label="Alejar"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg></button>
+                <button type="button" id="zFit" aria-label="Ver todo el corredor"><svg class="ic" aria-hidden="true"><use href="#i-target"/></svg></button>
+              </div>
+              <div class="escala" id="escala"></div>
+            </div>
+          </div>
+
+          <div class="tables">
+            <div class="card">
+              <div class="cardHead"><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg><h2>Alertas recientes</h2><button type="button" class="link" id="verAlertas">Ver todas<svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
+              <div class="tw"><table><thead><tr><th>Hora</th><th>Nodo</th><th>Evento</th><th>Estado</th></tr></thead><tbody id="tAlertas"></tbody></table></div>
+            </div>
+            <div class="card">
+              <div class="cardHead"><svg class="ic" aria-hidden="true"><use href="#i-nodes"/></svg><h2>Estado general de nodos</h2><button type="button" class="link" id="verNodos">Ver todos<svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></button></div>
+              <div class="tw"><table><thead><tr><th>Nodo</th><th>Ubicación (poste)</th><th>Estado</th><th>Última actualización</th></tr></thead><tbody id="tNodos"></tbody></table></div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="card detalle" id="detalle">
+          <div class="cardHead"><span class="ico sm t-warn"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg></span><h2>Detalle del nodo</h2><button type="button" class="x" id="cerrar" aria-label="Cerrar detalle" hidden><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+          <div class="vacio" id="vacio">
+            <svg viewBox="0 0 320 230" aria-hidden="true">
+              <path d="M0 196c50-34 96-40 150-28s110 6 170-22v84H0z" fill="#e6edf5"/>
+              <g fill="#bcc9da"><path d="M48 122l16 30h-8l12 22h-10v22H42v-22H28l12-22h-8z"/><path d="M88 96l20 36h-10l15 27h-12v37h-9v-37H77l15-27H82z"/><path d="M270 126l15 28h-8l11 20h-9v22h-8v-22h-12l11-20h-8z"/></g>
+              <rect x="158" y="24" width="9" height="206" rx="3" fill="#7e8fb0"/>
+              <path d="M146 58l48-22" stroke="#7e8fb0" stroke-width="5" stroke-linecap="round"/>
+              <path d="M194 36v20" stroke="#7e8fb0" stroke-width="3"/>
+              <path d="M180 62a14 12 0 0 1 28 0z" fill="#5d7fc0"/><circle cx="194" cy="66" r="6" fill="#2f6fd0"/>
+              <rect x="170" y="104" width="30" height="44" rx="5" fill="#eef3f9" stroke="#7e8fb0" stroke-width="3"/>
+              <g fill="none" stroke="#2484df" stroke-width="2.500" stroke-linecap="round"><path d="M178 92a9 9 0 0 1 14 0"/><path d="M181.500 96a5 5 0 0 1 7 0"/></g>
+              <circle cx="185" cy="99" r="1.800" fill="#2484df"/>
+            </svg>
+            <h3>Selecciona un nodo</h3>
+            <p>Haz clic en un nodo del cortafuego para ver variables, cámara e historial.</p>
+          </div>
+          <div class="ficha" id="ficha" hidden>
+            <div class="fichaTop"><h3 id="dNombre"></h3><span id="dEstado"></span></div>
+            <p class="meta" id="dMeta"></p>
+            <div class="vars">
+              <div class="var"><span>Temperatura</span><b id="dTemp"></b></div>
+              <div class="var"><span>Humedad</span><b id="dHum"></b></div>
+              <div class="var pend"><span>Viento</span><b>-- <small>m/s</small></b><em>Anemómetro por conectar</em></div>
+              <div class="var pend"><span>Material particulado</span><b>-- <small>µg/m³</small></b><em>PM2.5 por conectar</em></div>
+            </div>
+            <div class="graf"><h4>Temperatura (°C)<span id="lTemp"></span></h4><div id="gTemp"></div></div>
+            <div class="graf"><h4>Humedad (%)<span id="lHum"></span></h4><div id="gHum"></div></div>
+            <div class="cam"><b>Cámara RGB + térmica</b>Aún no conectada al prototipo</div>
+            <div class="graf"><h4>Historial del nodo</h4><ul class="hist" id="dHist"></ul></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="vista" id="v-alertas" hidden>
+      <div class="dos">
+        <div class="card"><div class="cardHead"><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg><div><h2>Alertas activas</h2><p>Nodos que requieren revisión del operador.</p></div></div><div class="lista" id="activas"></div></div>
+        <div class="card"><div class="cardHead"><svg class="ic" aria-hidden="true"><use href="#i-fire"/></svg><div><h2>Secuencia de respuesta</h2><p>Qué ocurre cuando el sistema detecta una condición crítica.</p></div></div>
+          <ol class="pasos">
+            <li><div><b>Detectar anomalía</b>Comparar las variables con los rangos definidos.</div></li>
+            <li><div><b>Revisar evidencia</b>Variables, cámara RGB/térmica y ubicación del poste.</div></li>
+            <li><div><b>Clasificar nivel</b>Normal, advertencia o crítico según las reglas.</div></li>
+            <li><div><b>Notificar</b>Operador municipal y equipos de emergencia.</div></li>
+            <li><div><b>Registrar evento</b>Guardar hora, nodo, variables e historial.</div></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="vista" id="v-eventos" hidden>
+      <div class="card"><div class="cardHead"><svg class="ic" aria-hidden="true"><use href="#i-cal"/></svg><div><h2>Registro de eventos</h2><p>Cambios de estado desde que se abrió esta página. Se reinicia al recargarla.</p></div></div>
+        <div class="tw"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Nodo</th><th>Ubicación (poste)</th><th>Evento</th><th>Estado</th></tr></thead><tbody id="tEventos"></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="vista" id="v-post" hidden>
+      <div class="dos" style="grid-template-columns:1fr 1fr">
+        <div class="card"><div class="cardHead"><h2>Antes del evento</h2></div><div class="comp"><div class="metric"><span>Humedad del suelo</span><b>-- %</b></div><div class="metric"><span>Temperatura del suelo</span><b>-- °C</b></div><div class="metric"><span>pH</span><b>--</b></div><div class="metric"><span>NPK</span><b>--</b></div><div class="metric"><span>Conductividad</span><b>-- µS/cm</b></div></div></div>
+        <div class="card"><div class="cardHead"><h2>Después del evento</h2></div><div class="comp"><div class="metric"><span>Humedad del suelo</span><b>-- %</b></div><div class="metric"><span>Temperatura del suelo</span><b>-- °C</b></div><div class="metric"><span>pH</span><b>--</b></div><div class="metric"><span>NPK</span><b>--</b></div><div class="metric"><span>Conductividad</span><b>-- µS/cm</b></div></div></div>
+      </div>
+      <div class="card" style="margin-top:14px"><div class="cardHead"><svg class="ic" aria-hidden="true"><use href="#i-leaf"/></svg><div><h2>Interpretación</h2><p>Módulo de suelo por conectar. Esta pantalla no muestra lecturas hasta que existan.</p></div></div>
+        <p class="texto">Cuando el módulo de suelo esté instalado, el sistema comparará el estado previo guardado en el historial con la medición posterior al incendio y generará un reporte técnico del corredor.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+
+<script>
+/* ---- solo vista previa: reemplaza el endpoint /data del ESP32 por lecturas simuladas ---- */
+(function(){
+  var T = [22.8, 23.0, 23.2, 22.9, 23.2, 23.4, 23.4, 23.4, 23.2, 23.1, 23.3, 23.4, 23.5, 23.2, 23.1, 23.4, 23.3, 23.3, 23.2, 23.3, 23.5, 23.4, 23.2, 23.2, 22.9, 22.9, 23.1, 23.1, 23.2, 23.5], H = [44, 44, 45, 44, 44, 43, 42, 42, 42, 42, 42, 41, 40, 41, 41, 41, 42, 42, 43, 43, 43, 42, 41, 41, 42, 41, 41, 41, 40, 40], objT = 23.4, objH = 41, primera = true, apagado = false;
+  function medir(){
+    var t = T[T.length-1], h = H[H.length-1];
+    t += (objT - t)*0.3 + (Math.random()-0.5)*0.4; h += (objH - h)*0.3 + (Math.random()-0.5)*1.4;
+    T.shift(); H.shift(); T.push(Math.round(t*10)/10); H.push(Math.round(h));
+  }
+  function jsonDatos(){
+    var t = T[T.length-1];
+    return JSON.stringify({temperatura:t, humedad:H[H.length-1], estado: t >= 30 ? "CRITICO" : t >= 25 ? "ALERTA" : "NORMAL",
+      nodo:"A-07", zona:"Interfaz La Reina", umbralAlerta:25, umbralCritico:30, lecturas:30, edadMs:400, historialTemp:T, historialHum:H});
+  }
+  var real = window.fetch;
+  window.fetch = function(u){
+    if (String(u) === "/data"){
+      if (apagado) return Promise.reject(new TypeError("sin red"));
+      if (primera) primera = false; else medir();
+      return Promise.resolve(new Response(jsonDatos(), {headers:{"Content-Type":"application/json"}}));
+    }
+    return real.apply(this, arguments);
+  };
+  var esc = {normal:[23.4,41], alerta:[27.2,30], critico:[32.4,21], off:null};
+  Object.keys(esc).forEach(function(k){
+    document.getElementById("sim-"+k).addEventListener("click", function(){
+      apagado = !esc[k]; if (esc[k]) { objT = esc[k][0]; objH = esc[k][1]; }
+      Object.keys(esc).forEach(function(j){ document.getElementById("sim-"+j).setAttribute("aria-pressed", String(j===k)); });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+"use strict";
+
+/* ================= CONFIGURACION ================= */
+var NODO_REAL="A-07";  /* nodo que corresponde al DHT11 conectado al ESP32 */
+var DEMO=true;         /* true: los otros nodos muestran datos simulados. false: aparecen sin conexion */
+var TOTAL=10;          /* postes del corredor, uno por nodo */
+var LARGO_M=100;       /* largo del cortafuego en metros */
+var MAXH=30;           /* lecturas que guarda cada grafico */
+var CADA_MS=2000;      /* cada cuanto se consulta al ESP32 */
+
+var EST={normal:{t:"Normal",c:"ok",g:""},adv:{t:"Advertencia",c:"warn",g:"!"},crit:{t:"Crítico",c:"crit",g:"!"},off:{t:"Sin conexión",c:"off",g:"×"}};
+var ORDEN={crit:0,adv:1,off:2,normal:3};
+var MESES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+var TIT={monitoreo:"Monitoreo de cortafuego",alertas:"Alertas",eventos:"Eventos",post:"Post-incendio"};
+var ZOOMS=[1,1.6,2.4];
+
+var nodos=[],eventos=[],sel=null,vista="monitoreo",verTodos=false;
+var umbral={adv:25,crit:30},serie={tm:[],tx:[],hm:[]};
+var zi=0,foco={x:.5,y:.5};
+
+function $(id){return document.getElementById(id);}
+function p2(n){return (n<10?"0":"")+n;}
+function hm(d){return d?p2(d.getHours())+":"+p2(d.getMinutes()):"--:--";}
+function hms(d){return d?hm(d)+":"+p2(d.getSeconds()):"--:--";}
+function fecha(d){return d.getDate()+" "+MESES[d.getMonth()]+" "+d.getFullYear();}
+function r1(v){return Math.round(v*10)/10;}
+function set(el,h){if(el.__h!==h){el.innerHTML=h;el.__h=h;}}
+function ic(n){return '<svg class="ic" aria-hidden="true"><use href="#i-'+n+'"/></svg>';}
+function pill(e){return '<span class="pill t-'+EST[e].c+'">'+EST[e].t+'</span>';}
+function dot(e){return '<i class="dot t-'+EST[e].c+'"></i>';}
+function nodo(id){for(var i=0;i<nodos.length;i++){if(nodos[i].id===id){return nodos[i];}}return null;}
+function metros(n){return Math.round((n.poste-1)*LARGO_M/(TOTAL-1));}
+
+/* ================= DATOS ================= */
+function paso(n){
+  n.temp=r1(n.temp+(n.bt-n.temp)*.15+(Math.random()-.5)*.5);
+  n.hum=Math.round(n.hum+(n.bh-n.hum)*.15+(Math.random()-.5)*1.6);
+  n.ht.push(n.temp);n.hh.push(n.hum);
+  if(n.ht.length>MAXH){n.ht.shift();n.hh.shift();}
+}
+function iniciar(){
+  var ahora=Date.now(),i,j,n;
+  for(i=0;i<TOTAL;i++){
+    n={id:"A-"+p2(i+1),poste:i+1,estado:"off",temp:null,hum:null,ht:[],hh:[],ultima:null,desde:new Date(ahora)};
+    n.real=n.id===NODO_REAL;
+    if(DEMO&&!n.real){
+      n.bt=21+Math.random()*2.6;n.bh=39+Math.random()*8;n.temp=n.bt;n.hum=n.bh;
+      for(j=0;j<MAXH;j++){paso(n);}
+      n.estado="normal";n.ultima=new Date(ahora-Math.random()*150000);
+    }
+    nodos.push(n);
+  }
+  if(DEMO){
+    [[84,"A-03","Condiciones normales","normal"],[108,"A-09","Sin conexión breve","off"],[191,"A-05","Humedad baja","adv"]].forEach(function(s){
+      var m=nodo(s[1]);
+      if(m&&!m.real){eventos.push({t:new Date(ahora-s[0]*60000),id:m.id,poste:m.poste,txt:s[2],est:s[3]});}
+    });
+  }
+  set($("pie"),"Prototipo · nodo "+NODO_REAL+" con sensor real"+(DEMO?", resto de los nodos simulados":""));
+}
+function registrar(n,txt,est){
+  eventos.unshift({t:new Date(),id:n.id,poste:n.poste,txt:txt,est:est});
+  if(eventos.length>200){eventos.pop();}
+}
+function cambiar(n,est,txt){
+  if(n.estado===est){return;}
+  n.estado=est;n.desde=new Date();registrar(n,txt,est);
+}
+function aplicar(n,d){
+  var e=d.estado==="CRITICO"?"crit":d.estado==="ALERTA"?"adv":"normal";
+  var txt=e==="crit"?"Temperatura crítica":e==="adv"?"Temperatura elevada":n.estado==="off"?"Conexión establecida":"Condiciones normales";
+  n.temp=d.temperatura;n.hum=d.humedad;
+  n.ht=d.historialTemp||[];n.hh=d.historialHum||[];
+  n.ultima=new Date();
+  if(d.umbralAlerta){umbral.adv=d.umbralAlerta;}
+  if(d.umbralCritico){umbral.crit=d.umbralCritico;}
+  cambiar(n,e,txt);
+}
+function leer(){
+  return fetch("/data",{cache:"no-store"}).then(function(r){return r.json();}).catch(function(){return null;}).then(function(d){
+    var real=nodo(NODO_REAL),t=[],h=[],s=0;
+    if(real){
+      if(d&&d.lecturas!==0&&!(d.edadMs>10000)){aplicar(real,d);}
+      else{cambiar(real,"off",d?"Sensor sin respuesta":"Sin conexión");}
+    }
+    nodos.forEach(function(n){
+      if(DEMO&&!n.real&&Math.random()<.3){paso(n);n.ultima=new Date();}
+      if(n.estado!=="off"&&n.temp!==null){t.push(n.temp);h.push(n.hum);s+=n.temp;}
+    });
+    if(t.length){
+      serie.tm.push(r1(s/t.length));serie.tx.push(Math.max.apply(null,t));serie.hm.push(Math.min.apply(null,h));
+      if(serie.tm.length>MAXH){serie.tm.shift();serie.tx.shift();serie.hm.shift();}
+    }
+    pintar();
+  });
+}
+
+/* ================= GRAFICOS ================= */
+function spark(v,tono,nombre){
+  var W=104,H=34,i,mn,mx,m,pts=[];
+  if(v.length<2){return '<svg viewBox="0 0 104 34" aria-hidden="true"><line x1="3" y1="24" x2="101" y2="24" style="stroke:var(--'+tono+')" stroke-width="2" stroke-dasharray="2 5" stroke-linecap="round"/></svg>';}
+  mn=Math.min.apply(null,v);mx=Math.max.apply(null,v);
+  if(mx-mn<2){m=(mx+mn)/2;mn=m-1;mx=m+1;}
+  for(i=0;i<v.length;i++){
+    pts.push((4+i*(W-8)/(v.length-1)).toFixed(1)+","+(H-5-((v[i]-mn)/(mx-mn))*(H-10)).toFixed(1));
+  }
+  return '<svg viewBox="0 0 104 34" role="img" aria-label="Tendencia de '+nombre+'"><polyline points="'+pts.join(" ")+'" fill="none" style="stroke:var(--'+tono+')" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+function num(v){return v%1?v.toFixed(1):String(v);}
+function grafico(v,tono,marcas,nombre){
+  var W=340,H=116,L=34,R=330,T=10,B=86,i,lo,hi,pts=[],h,ult;
+  if(!v||v.length<2){return '<p class="nota">Esperando lecturas del nodo.</p>';}
+  lo=Math.floor(Math.min.apply(null,v)-1);hi=Math.ceil(Math.max.apply(null,v)+1);
+  function Y(x){return B-((x-lo)/(hi-lo))*(B-T);}
+  function X(k){return R-(v.length-1-k)*((R-L)/(MAXH-1));}
+  h='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+nombre+', últimas '+v.length+' lecturas" data-n="'+v.length+'">';
+  [lo,(lo+hi)/2,hi].forEach(function(g){
+    h+='<line x1="'+L+'" x2="'+R+'" y1="'+Y(g).toFixed(1)+'" y2="'+Y(g).toFixed(1)+'" style="stroke:var(--line)" stroke-width="1"/><text class="ax" x="'+(L-6)+'" y="'+(Y(g)+4).toFixed(1)+'" text-anchor="end">'+num(g)+'</text>';
+  });
+  marcas.forEach(function(m){
+    if(m.v>lo&&m.v<hi){h+='<line x1="'+L+'" x2="'+R+'" y1="'+Y(m.v).toFixed(1)+'" y2="'+Y(m.v).toFixed(1)+'" style="stroke:var(--'+m.c+')" stroke-width="1.500" stroke-dasharray="4 4"/><text class="ax" x="'+(L+4)+'" y="'+(Y(m.v)-4).toFixed(1)+'">'+m.t+'</text>';}
+  });
+  for(i=0;i<v.length;i++){pts.push(X(i).toFixed(1)+","+Y(v[i]).toFixed(1));}
+  ult=v.length-1;
+  h+='<polygon points="'+X(0).toFixed(1)+","+B+" "+pts.join(" ")+" "+R+","+B+'" style="fill:var(--'+tono+')" opacity=".12"/>';
+  h+='<polyline points="'+pts.join(" ")+'" fill="none" style="stroke:var(--'+tono+')" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+  h+='<line class="guia" x1="0" x2="0" y1="'+T+'" y2="'+B+'" style="stroke:var(--muted)" stroke-width="1" visibility="hidden"/>';
+  h+='<circle class="punto" cx="'+X(ult).toFixed(1)+'" cy="'+Y(v[ult]).toFixed(1)+'" r="4.500" style="fill:var(--'+tono+')" stroke="#fff" stroke-width="2"/>';
+  h+='<text class="ax" x="'+L+'" y="'+(H-8)+'">hace '+Math.round((MAXH-1)*CADA_MS/1000)+' s</text><text class="ax" x="'+R+'" y="'+(H-8)+'" text-anchor="end">ahora</text></svg>';
+  return h;
+}
+/* lectura al pasar el cursor o el dedo por un grafico */
+function sondear(caja,etq,vals,unidad){
+  function mover(e){
+    var svg=caja.querySelector("svg"),b,x,k,L=34,R=330,lo,hi,px,py;
+    if(!svg||!vals().length){return;}
+    b=svg.getBoundingClientRect();x=(e.clientX-b.left)/b.width*340;
+    k=Math.round(vals().length-1-(R-x)/((R-L)/(MAXH-1)));
+    k=Math.max(0,Math.min(vals().length-1,k));
+    lo=Math.floor(Math.min.apply(null,vals())-1);hi=Math.ceil(Math.max.apply(null,vals())+1);
+    px=R-(vals().length-1-k)*((R-L)/(MAXH-1));py=86-((vals()[k]-lo)/(hi-lo))*76;
+    svg.querySelector(".guia").setAttribute("x1",px);svg.querySelector(".guia").setAttribute("x2",px);
+    svg.querySelector(".guia").setAttribute("visibility","visible");
+    svg.querySelector(".punto").setAttribute("cx",px);svg.querySelector(".punto").setAttribute("cy",py);
+    etq.textContent=num(vals()[k])+" "+unidad+" · hace "+Math.round((vals().length-1-k)*CADA_MS/1000)+" s";
+    caja.__fijo=true;
+  }
+  caja.addEventListener("pointermove",mover);
+  caja.addEventListener("pointerdown",mover);
+  caja.addEventListener("pointerleave",function(){caja.__fijo=false;caja.__h=null;pintarDetalle();});
+}
+
+/* ================= MAPA ================= */
+function pos(i){return {x:7+i*(84.6/(TOTAL-1)),y:36+i*(38.7/(TOTAL-1))};}
+function azar(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+function terreno(){
+  var c=$("terreno"),caja=$("mapInner"),w=caja.clientWidth,h=caja.clientHeight;
+  if(!w||!h){return;}
+  var dpr=Math.min(window.devicePixelRatio||1,2),g=c.getContext("2d"),s=azar(11),u=Math.sqrt(w*h/(900*362)),i,x,y,r,d,col;
+  var a=pos(-1.6),b=pos(TOTAL+.6),ax=a.x/100*w,ay=a.y/100*h,bx=b.x/100*w,by=b.y/100*h,len=Math.sqrt((bx-ax)*(bx-ax)+(by-ay)*(by-ay)),nx=-(by-ay)/len,ny=(bx-ax)/len,hw=15*u;
+  var verdes=["#223a1b","#2a4720","#335325","#3d5f29","#48692f","#577838","#283f22","#445a2b"];
+  function camino(ancho,color){g.strokeStyle=color;g.lineWidth=ancho;g.beginPath();g.moveTo(ax,ay);g.lineTo(bx,by);g.stroke();}
+  c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle="#3d5629";g.fillRect(0,0,w,h);
+  for(i=0;i<90;i++){
+    x=s()*w;y=s()*h;r=(14+s()*34)*u;
+    g.fillStyle=i%3?"rgba(125,100,66,.42)":"rgba(86,110,52,.5)";
+    g.beginPath();g.ellipse(x,y,r,r*(.5+s()*.4),s()*3,0,6.3);g.fill();
+  }
+  camino(2*hw+9*u,"rgba(118,94,60,.55)");camino(2*hw,"#c5a57b");camino(hw*.9,"#d5b88e");
+  for(i=0;i<520;i++){
+    d=s();r=(s()-.5)*2*hw;x=ax+(bx-ax)*d+nx*r;y=ay+(by-ay)*d+ny*r;
+    g.fillStyle=i%2?"rgba(96,74,46,.28)":"rgba(236,216,180,.3)";g.fillRect(x,y,1.6*u+.6,1.6*u+.6);
+  }
+  for(i=0;i<3800;i++){
+    x=s()*w;y=s()*h;r=(3.2+s()*6.6)*u;col=verdes[Math.floor(s()*verdes.length)];
+    d=Math.abs((x-ax)*nx+(y-ay)*ny);
+    if(d<hw+r*.5){continue;}
+    g.fillStyle="rgba(14,24,10,.34)";g.beginPath();g.arc(x+r*.28,y+r*.32,r,0,6.3);g.fill();
+    g.fillStyle=col;g.beginPath();g.arc(x,y,r,0,6.3);g.fill();
+    g.fillStyle="rgba(196,220,128,.11)";g.beginPath();g.arc(x-r*.3,y-r*.3,r*.5,0,6.3);g.fill();
+  }
+}
+function armarMapa(){
+  var h="";
+  nodos.forEach(function(n,i){
+    var p=pos(i);
+    h+='<button type="button" class="poste" data-id="'+n.id+'" style="left:'+p.x.toFixed(2)+'%;top:'+p.y.toFixed(2)+'%"><span class="pl"></span><span class="palo"></span><span class="pin"><i class="dot"></i><b>Nodo '+n.id+'</b></span></button>';
+  });
+  $("capa").innerHTML=h;
+}
+function pintarMapa(){
+  var w=$("mapInner").clientWidth,sep=w*84.6/(TOTAL-1)/100,bts=$("capa").children;
+  nodos.forEach(function(n,i){
+    var b=bts[i],e=EST[n.estado],es=sel===n,ver=es||n.estado!=="normal"||(sep>=78&&i%2===0);
+    b.className="poste t-"+e.c+(es?" sel":"")+(ver?" lbl":"");
+    b.setAttribute("aria-label","Nodo "+n.id+", poste "+p2(n.poste)+", "+e.t);
+    b.setAttribute("aria-pressed",es?"true":"false");
+    b.querySelector(".dot").textContent=e.g;
+    b.querySelector(".pl").textContent=sep>=66?"Poste "+p2(n.poste):p2(n.poste);
+    b.querySelector(".pl").hidden=sep<30&&!es;
+  });
+}
+function escala(){
+  var w=$("mapInner").clientWidth,h=$("mapInner").clientHeight,a=pos(0),b=pos(TOTAL-1);
+  var px=Math.sqrt(Math.pow((b.x-a.x)/100*w,2)+Math.pow((b.y-a.y)/100*h,2)),ppm=px/LARGO_M,ops=[100,50,20,10,4,2],L=2,i;
+  for(i=0;i<ops.length;i++){if(ops[i]*ppm<=170){L=ops[i];break;}}
+  set($("escala"),'<div class="nums"><span>0</span><span>'+L/2+'</span><span>'+L+' m</span></div><div class="barra" style="width:'+Math.round(L*ppm)+'px"></div>');
+}
+function encuadrar(redibujar){
+  var z=ZOOMS[zi],caja=$("mapInner");
+  foco.x=Math.max(.5/z,Math.min(1-.5/z,foco.x));foco.y=Math.max(.5/z,Math.min(1-.5/z,foco.y));
+  caja.style.width=z*100+"%";caja.style.height=z*100+"%";
+  caja.style.left=(.5-foco.x*z)*100+"%";caja.style.top=(.5-foco.y*z)*100+"%";
+  if(redibujar){
+    $("map").className="map"+(z>1?" zoomed":"");
+    $("zIn").disabled=zi===ZOOMS.length-1;$("zOut").disabled=zi===0;$("zFit").disabled=zi===0;
+    terreno();pintarMapa();escala();
+  }
+}
+function arrastre(){
+  var m=$("map"),ini=null;
+  m.addEventListener("pointerdown",function(e){
+    if(zi===0||e.target.closest("button")){return;}
+    ini={x:e.clientX,y:e.clientY,fx:foco.x,fy:foco.y};m.setPointerCapture(e.pointerId);
+  });
+  m.addEventListener("pointermove",function(e){
+    if(!ini){return;}
+    var z=ZOOMS[zi];
+    foco.x=ini.fx-(e.clientX-ini.x)/(m.clientWidth*z);foco.y=ini.fy-(e.clientY-ini.y)/(m.clientHeight*z);
+    encuadrar(false);
+  });
+  function fin(){ini=null;}
+  m.addEventListener("pointerup",fin);m.addEventListener("pointercancel",fin);
+}
+
+/* ================= PINTAR ================= */
+function contar(e){return nodos.filter(function(n){return n.estado===e;}).length;}
+function ultimaAct(){var u=null;nodos.forEach(function(n){if(n.ultima&&(!u||n.ultima>u)){u=n.ultima;}});return u;}
+function filaEv(e,larga){
+  return '<tr>'+(larga?'<td>'+fecha(e.t)+'</td>':'')+'<td>'+dot(e.est)+(larga?hms(e.t):hm(e.t))+'</td><td>Nodo '+e.id+'</td>'+(larga?'<td>Poste '+p2(e.poste)+'</td>':'')+'<td>'+e.txt+'</td><td>'+pill(e.est)+'</td></tr>';
+}
+function pintarDetalle(){
+  var n=sel,propios;
+  $("vacio").hidden=!!n;$("ficha").hidden=!n;$("cerrar").hidden=!n;
+  if(!n){return;}
+  set($("dNombre"),"Nodo "+n.id);
+  set($("dEstado"),pill(n.estado));
+  set($("dMeta"),"Poste "+p2(n.poste)+" · a "+metros(n)+" m del inicio del corredor<br>"+(n.real?"DHT11 · lectura real":DEMO?"Datos simulados · sin sensor instalado":"Sin sensor instalado")+(n.ultima?" · "+hms(n.ultima):""));
+  set($("dTemp"),(n.temp===null?"--":n.temp.toFixed(1))+" <small>°C</small>");
+  set($("dHum"),(n.hum===null?"--":Math.round(n.hum))+" <small>%</small>");
+  if(!$("gTemp").__fijo){
+    set($("gTemp"),grafico(n.ht,n.estado==="crit"?"crit":n.estado==="adv"?"warn":"ok",[{v:umbral.adv,c:"warn",t:"Advertencia "+umbral.adv+" °C"},{v:umbral.crit,c:"crit",t:"Crítico "+umbral.crit+" °C"}],"Temperatura"));
+    set($("lTemp"),"últimas "+n.ht.length+" lecturas");
+  }
+  if(!$("gHum").__fijo){
+    set($("gHum"),grafico(n.hh,"info",[],"Humedad"));
+    set($("lHum"),"últimas "+n.hh.length+" lecturas");
+  }
+  propios=eventos.filter(function(e){return e.id===n.id;}).slice(0,4);
+  set($("dHist"),propios.length?propios.map(function(e){return '<li>'+dot(e.est)+'<time>'+hm(e.t)+'</time><span>'+e.txt+'</span></li>';}).join(""):'<li>Sin eventos registrados.</li>');
+}
+function pintar(){
+  var act=TOTAL-contar("off"),adv=contar("adv"),crit=contar("crit"),pend=TOTAL-contar("normal"),u=ultimaAct(),ev=null,i,lista,h;
+  for(i=0;i<eventos.length;i++){if(eventos[i].est!=="normal"){ev=eventos[i];break;}}
+
+  $("chipSis").className="chip t-"+(act===TOTAL?"ok":act===0?"off":"warn");
+  set($("chipSis"),'<i class="dot"></i><b>'+(act===0?"Sin conexión":"Sistema activo")+'</b> · '+(act===TOTAL?"Todos los nodos operativos":act+" de "+TOTAL+" nodos operativos"));
+  $("chipEv").className="chip t-"+(ev?EST[ev.est].c:"off");
+  set($("chipEv"),ic(ev&&ev.est!=="off"?"fire":"bell")+(ev?"Último evento: "+ev.txt.toLowerCase()+" en "+ev.id+" · "+hm(ev.t):"Sin eventos registrados"));
+  set($("chipAct"),ic("clock")+"Última actualización · <b>"+hm(u)+"</b>");
+
+  set($("kAct"),act+" / "+TOTAL);set($("kAdv"),String(adv));set($("kCrit"),String(crit));
+  set($("kHora"),hm(u));set($("kFecha"),u?fecha(u):"");
+  set($("sp1"),spark(serie.tm,"ok","temperatura media"));set($("sc1"),"T° media "+(serie.tm.length?serie.tm[serie.tm.length-1].toFixed(1)+" °C":"--"));
+  set($("sp2"),spark(serie.tx,"warn","temperatura máxima"));set($("sc2"),"T° máx. "+(serie.tx.length?serie.tx[serie.tx.length-1].toFixed(1)+" °C":"--"));
+  set($("sp3"),spark(serie.hm,"crit","humedad mínima"));set($("sc3"),"Humedad mín. "+(serie.hm.length?Math.round(serie.hm[serie.hm.length-1])+" %":"--"));
+
+  ["navBadge","bellBadge"].forEach(function(id){$(id).hidden=pend===0;$(id).textContent=pend;});
+  $("bell").setAttribute("aria-label",pend?"Ver alertas: "+pend+" activas":"Ver alertas");
+
+  pintarMapa();
+
+  set($("tAlertas"),eventos.length?eventos.slice(0,4).map(function(e){return filaEv(e,false);}).join(""):'<tr><td class="nada" colspan="4">Sin eventos registrados.</td></tr>');
+  lista=nodos.slice().sort(function(a,b){return ORDEN[a.estado]-ORDEN[b.estado]||a.poste-b.poste;});
+  if(!verTodos){lista=lista.slice(0,6);}
+  set($("tNodos"),lista.map(function(n){
+    return '<tr class="clic'+(sel===n?" sel":"")+'" data-id="'+n.id+'" tabindex="0">'+'<td>'+dot(n.estado)+'<b>'+n.id+'</b></td><td>Poste '+p2(n.poste)+'</td><td>'+pill(n.estado)+'</td><td>'+hm(n.ultima)+'</td></tr>';
+  }).join(""));
+  set($("verNodos"),(verTodos?"Ver menos":"Ver todos")+ic("arrow"));
+
+  pintarDetalle();
+
+  h=nodos.filter(function(n){return n.estado!=="normal";}).sort(function(a,b){return ORDEN[a.estado]-ORDEN[b.estado];}).map(function(n){
+    return '<div class="alerta t-'+EST[n.estado].c+'">'+dot(n.estado)+'<div><b>Nodo '+n.id+' · '+EST[n.estado].t+'</b><br><span>Poste '+p2(n.poste)+' · desde las '+hm(n.desde)+(n.temp!==null?' · '+n.temp.toFixed(1)+' °C, '+Math.round(n.hum)+' %':'')+'</span></div><button type="button" class="link" data-ver="'+n.id+'">Ver nodo'+ic("arrow")+'</button></div>';
+  }).join("");
+  set($("activas"),h||'<p class="nota">Sin alertas activas. Todos los nodos están en condición normal.</p>');
+  set($("tEventos"),eventos.length?eventos.map(function(e){return filaEv(e,true);}).join(""):'<tr><td class="nada" colspan="6">Sin eventos registrados.</td></tr>');
+}
+
+/* ================= INTERACCION ================= */
+function ir(v){
+  vista=v;
+  ["monitoreo","alertas","eventos","post"].forEach(function(k){$("v-"+k).hidden=k!==v;});
+  [].forEach.call($("nav").children,function(b){var on=b.getAttribute("data-v")===v;b.className=on?"on":"";if(on){b.setAttribute("aria-current","page");}else{b.removeAttribute("aria-current");}});
+  $("titulo").textContent=TIT[v];
+  window.scrollTo(0,0);
+  if(v==="monitoreo"){encuadrar(true);}
+}
+function elegir(id){
+  var p;
+  sel=id?nodo(id):null;
+  $("gTemp").__fijo=false;$("gHum").__fijo=false;
+  if(sel){p=pos(sel.poste-1);foco={x:p.x/100,y:p.y/100};encuadrar(false);}
+  pintar();
+  if(sel&&window.matchMedia("(max-width:1180px)").matches){$("detalle").scrollIntoView({block:"nearest"});}
+}
+function eventosUI(){
+  $("nav").addEventListener("click",function(e){var b=e.target.closest("button");if(b){ir(b.getAttribute("data-v"));}});
+  $("bell").addEventListener("click",function(){ir("alertas");});
+  $("verAlertas").addEventListener("click",function(){ir("alertas");});
+  $("verNodos").addEventListener("click",function(){verTodos=!verTodos;pintar();});
+  $("cerrar").addEventListener("click",function(){elegir(null);});
+  $("capa").addEventListener("click",function(e){var b=e.target.closest(".poste");if(b){elegir(sel&&sel.id===b.getAttribute("data-id")?null:b.getAttribute("data-id"));}});
+  $("tNodos").addEventListener("click",function(e){var f=e.target.closest("tr[data-id]");if(f){elegir(f.getAttribute("data-id"));}});
+  $("tNodos").addEventListener("keydown",function(e){var f=e.target.closest("tr[data-id]");if(f&&(e.key==="Enter"||e.key===" ")){e.preventDefault();elegir(f.getAttribute("data-id"));}});
+  $("activas").addEventListener("click",function(e){var b=e.target.closest("[data-ver]");if(b){ir("monitoreo");elegir(b.getAttribute("data-ver"));}});
+  $("zIn").addEventListener("click",function(){if(zi<ZOOMS.length-1){zi++;encuadrar(true);}});
+  $("zOut").addEventListener("click",function(){if(zi>0){zi--;encuadrar(true);}});
+  $("zFit").addEventListener("click",function(){zi=0;foco={x:.5,y:.5};encuadrar(true);});
+  sondear($("gTemp"),$("lTemp"),function(){return sel?sel.ht:[];},"°C");
+  sondear($("gHum"),$("lHum"),function(){return sel?sel.hh:[];},"%");
+  arrastre();
+  var espera=null;
+  window.addEventListener("resize",function(){clearTimeout(espera);espera=setTimeout(function(){if(vista==="monitoreo"){encuadrar(true);}},120);});
+}
+
+iniciar();armarMapa();eventosUI();encuadrar(true);pintar();
+leer();setInterval(leer,CADA_MS);
+})();
+</script>
+</body></html>
