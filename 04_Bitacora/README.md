@@ -1,6 +1,9 @@
-# LAB-INTERDISCIPLINARIO-2026
+**LAB-INTERDISCIPLINARIO-2026**
 
 Bitácora de investigación sobre personas expuestas a la amenaza de incendios forestales en La Reina, en el contexto de patrimonio y turismo urbano.
+
+# 21/08
+
 **Avance 01 — Enmarque inicial del problema**
 
 Problemática
@@ -118,9 +121,10 @@ Comparar el caso de la Municipalidad de La Reina con los referentes seleccionado
 - **Referentes indirectos:** analizar qué principios o características comparten con el problema estudiado y cuáles podrían ser transferibles al proyecto.
 
 
-**09 Oct**
+# 09 Oct
 
-Qué es. La solución es un borde cortafuego habitable con un sistema de monitoreo integrado. Es una franja de transición entre la vegetación del cerro y las viviendas, y cumple tres funciones a la vez:
+**Qué es**
+La solución es un borde cortafuego habitable con un sistema de monitoreo integrado. Es una franja de transición entre la vegetación del cerro y las viviendas, y cumple tres funciones a la vez:
 
 Protección preventiva. Es una banda de baja combustibilidad, con áreas despejadas, que interrumpe la continuidad de la vegetación entre el bosque y las casas. Reduce el combustible disponible antes de que el fuego llegue a las viviendas.
 Uso comunitario cotidiano. La franja tiene un camino, espacios de permanencia y un canal de agua a un lado. En condiciones normales es un lugar de paseo y encuentro, no una infraestructura que solo se usa en emergencias (principio tomado del Parque de Refugio Manuel Bustos).
@@ -135,7 +139,7 @@ Nivel alto: la cámara, los sensores ambientales (anemómetro, veleta, temperatu
 Acceso: una puerta en la base y una escalera interior, solo para mantención. Las personas no suben, por el riesgo en una evacuación.
 Bajo tierra: en la base de cada torre hay un módulo técnico conectado a los sensores de suelo.
 
-Cómo funciona el sistema, paso a paso
+**Cómo funciona el sistem**
 
 Captura de datos. Cada torre mide, sobre el terreno, temperatura y humedad ambiental, velocidad y dirección del viento, material particulado y su ubicación (GPS). Su cámara dual RGB + térmica capta imagen visible y calor. Bajo tierra, sensores miden temperatura, humedad, pH, conductividad y nitrógeno-fósforo-potasio (NPK) del suelo.
 Concentración y envío. Un microcontrolador ESP32-S3 recibe las señales de todos los sensores de la torre, las ordena y las entrega a un módulo de comunicación. Los datos viajan al servidor por LoRa o NB-IoT, tecnologías de bajo consumo y largo alcance. Las imágenes de la cámara viajan por red IP en streaming, porque son mucho más pesadas.
@@ -153,7 +157,7 @@ Diferencia entre información y alerta. La información son los datos medidos y 
 
 Estados del sistema. Cada sector pasa por estados que se muestran con color: normal, vigilancia, alerta y crítico. En la maqueta se simplifican a normal, precaución y alerta.
 
-Qué ve cada usuario
+**Qué ve cada usuario**
 
 Operador municipal: el dashboard completo (mapa de torres, cámaras, variables, eventos e historial). Es quien monitorea, selecciona torres y consulta.
 Bomberos y Municipalidad: una notificación directa con la información necesaria para actuar, sin tener que abrir el dashboard.
@@ -193,7 +197,7 @@ Usuarios. Tres salidas distintas: el operador municipal, Bomberos/Municipalidad 
 
 El diagrama se construyó con la tabla de componentes y relaciones (desde, hacia, medio y función), para que cada conexión quede definida: por ejemplo BME280 → ESP32-S3 por I²C, o ESP32-S3 → servidor por LoRa o NB-IoT. Se desarrollaron dos versiones, una para la maqueta (con comunicación Wi-Fi) y otra para el caso real.
 
-Bitácora de avance: BOM (BOMV01)
+**BOM** (BOMV01)
 
 El BOM se elaboró en la plantilla del Taller Integrado, con las hojas de BOM, Trazabilidad, Resumen e Historial. La trazabilidad conecta cada función de la arquitectura con uno o más ítems físicos.
 
