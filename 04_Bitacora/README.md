@@ -121,7 +121,7 @@ Comparar el caso de la Municipalidad de La Reina con los referentes seleccionado
 - **Referentes indirectos:** analizar qué principios o características comparten con el problema estudiado y cuáles podrían ser transferibles al proyecto.
 
 
-Bitácora de avance: Propuesta de solución
+#09 Oct
 
 Qué es. La solución es un borde cortafuego habitable con un sistema de monitoreo integrado. Es una franja de transición entre la vegetación del cerro y las viviendas, y cumple tres funciones a la vez:
 
