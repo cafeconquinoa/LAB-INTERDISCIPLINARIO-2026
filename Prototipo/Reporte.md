@@ -109,8 +109,17 @@ Para continuar con el desarrollo del prototipo se establecieron las siguientes t
 8. Verificar que los datos se actualicen correctamente en el dashboard.
 9. Realizar pruebas de funcionamiento simultáneo para comprobar la estabilidad del sistema.
 
+### 8. Protocolo de comunicación.
+| Sensor | Clasificación |
+|---|---|
+| DS18B20 | Ninguno |
+| Sensor de humedad del suelo | Ninguno |
+| DSM501A | Ninguno |
+| Sensor NPK | UART |
+
 **Conclusión de la etapa:**
 
 Se logró avanzar en la construcción de la base electrónica del prototipo, desarrollando la programación inicial del ESP32 e integrando satisfactoriamente algunos de los sensores ambientales y de suelo. El proceso permitió identificar problemas relacionados con la asignación de pines, la comunicación entre módulos y la lectura simultánea de sensores.
 
 Actualmente, el trabajo se encuentra enfocado en estabilizar las conexiones y validar individualmente los sensores que todavía presentan dificultades, con el objetivo de conseguir un funcionamiento conjunto y confiable del sistema de monitoreo.
+
