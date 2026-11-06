@@ -123,3 +123,26 @@ Se logró avanzar en la construcción de la base electrónica del prototipo, des
 
 Actualmente, el trabajo se encuentra enfocado en estabilizar las conexiones y validar individualmente los sensores que todavía presentan dificultades, con el objetivo de conseguir un funcionamiento conjunto y confiable del sistema de monitoreo.
 
+## # Desarrollo de la arquitectura fisica.
+
+### Descripción del avance
+
+Se inició la materialización de la maqueta topográfica correspondiente al sector de intervención del proyecto, mediante la utilización de placas de MDF cortadas siguiendo las curvas de nivel del terreno. Estas piezas fueron superpuestas progresivamente para representar las distintas alturas, pendientes e irregularidades de la superficie.
+
+El trabajo busca reproducir las características geográficas del sector de La Reina Alta y su relación con el entorno natural del Parque Aguas de Ramon, permitiendo comprender de manera tridimensional las variaciones de altura y la configuración del paisaje.
+
+### Objetivo del desarrollo
+
+La construcción de esta base topográfica permite visualizar las condiciones físicas del terreno y comprender cómo factores como las pendientes, quebradas y desniveles influyen en la accesibilidad, el desplazamiento y la propagación de incendios forestales.
+
+Esta representación constituye la base para posteriormente definir y ubicar los elementos que componen la propuesta, como el cortafuego habitable y el sistema de monitoreo y vigilancia, considerando las condiciones reales del territorio.
+
+### Próximos pasos
+
+- Completar y ajustar la superposición de las curvas de nivel.
+- Revisar la continuidad y precisión de los distintos niveles topográficos.
+- Incorporar una representación de la vegetación y los elementos relevantes del entorno.
+- Definir sobre la maqueta la ubicación de la intervención y sus componentes.
+- Estudiar la relación entre la topografía, las zonas de riesgo y las áreas de monitoreo.
+
+**Resultado del avance:** Se logró materializar una primera aproximación tridimensional del terreno mediante la superposición de curvas de nivel, estableciendo una base física para estudiar y desarrollar la intervención proyectual en relación con las características geográficas del lugar.
