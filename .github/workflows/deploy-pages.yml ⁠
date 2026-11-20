@@ -1,5 +1,4 @@
- yaml
-name: Publicar dashboard Cortafuego La Reina
+name: Publicar dashboard Cortafuego La Reina.
 
 on:
   push:
