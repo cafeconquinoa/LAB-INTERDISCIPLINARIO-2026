@@ -1,0 +1,13 @@
+# Credenciales y configuración local
+secrets.h
+secrets.local.h
+config.local.js
+.env
+.env.*
+!.env.example
+
+# Sistema operativo / editor
+.DS_Store
+Thumbs.db
+.vscode/
+firmware/secrets.h
