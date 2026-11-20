@@ -32,8 +32,7 @@ jobs:
 
       - name: Preparar archivos del dashboard
         uses: actions/upload-pages-artifact@v4
-        with:
-          path: cortafuego-la-reina
+        
 
       - name: Publicar sitio
         id: deployment
